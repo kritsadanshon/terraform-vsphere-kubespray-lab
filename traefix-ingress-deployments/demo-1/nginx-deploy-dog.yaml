@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service-dog
+  labels:
+    run: nginx
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    run: nginx-dog
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: nginx
+  name: nginx-deploy-dog
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: nginx-dog
+  template:
+    metadata:
+      labels:
+        run: nginx-dog
+    spec:
+      volumes:
+      - name: webdata
+        emptyDir: {}
+      initContainers:
+      - name: web-content
+        image: busybox
+        volumeMounts:
+        - name: webdata
+          mountPath: "/webdata"
+        command: ["/bin/sh", "-c", 'echo "<title>Welcome to nginx!</title><h1>DOG Application<h1/><p>____&nbsp; ___&nbsp; &nbsp;____<br />|&nbsp; &nbsp;_ \/&nbsp; _ \ / ___|<br />| |&nbsp; | | |&nbsp; | | |&nbsp; _<br />| |_| | |_| | |_| |<br />|___/\___/ \___|</p>" > /webdata/index.html']
+      containers:
+      - image: nginx
+        name: nginx
+        volumeMounts:
+        - name: webdata
+          mountPath: "/usr/share/nginx/html"

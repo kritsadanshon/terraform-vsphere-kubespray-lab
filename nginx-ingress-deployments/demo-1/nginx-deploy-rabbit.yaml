@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service-rabbit
+  labels:
+    run: nginx
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    run: nginx-rabbit
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: nginx
+  name: nginx-deploy-rabbit
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: nginx-rabbit
+  template:
+    metadata:
+      labels:
+        run: nginx-rabbit
+    spec:
+      volumes:
+      - name: webdata
+        emptyDir: {}
+      initContainers:
+      - name: web-content
+        image: busybox
+        volumeMounts:
+        - name: webdata
+          mountPath: "/webdata"
+        command: ["/bin/sh", "-c", 'echo "<title>Welcome to nginx!</title><h1>RABBIT Application<h1/><p>____&nbsp; &nbsp; &nbsp; &nbsp; _&nbsp; &nbsp; &nbsp;___&nbsp; ___&nbsp; ___ ____<br />|&nbsp; &nbsp;_ \&nbsp; &nbsp; &nbsp; / \&nbsp; &nbsp;| __ )| __ )_ _|_&nbsp; &nbsp;_|<br />|&nbsp; |_) |&nbsp; &nbsp;/ _ \&nbsp; |&nbsp; _ \|&nbsp; _&nbsp; \| |&nbsp; &nbsp; | |<br />|&nbsp; &nbsp;_ &lt;&nbsp; / ___ \| |_) | |_) | |&nbsp; &nbsp; | |<br />|_| \_\/_/&nbsp; &nbsp; \_\___/|___/___||_|</p>" > /webdata/index.html']
+      containers:
+      - image: nginx
+        name: nginx
+        volumeMounts:
+        - name: webdata
+          mountPath: "/usr/share/nginx/html"

@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-resource
+  annotations:
+    traefik.frontend.rule.type: PathPrefixStrip
+spec:
+  rules:
+  - host: k8s.lab.local
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nginx-service-main
+          servicePort: 80
+      - path: /cat
+        backend:
+          serviceName: nginx-service-cat
+          servicePort: 80
+      - path: /dog
+        backend:
+          serviceName: nginx-service-dog
+          servicePort: 80
+      - path: /rabbit
+        backend:
+          serviceName: nginx-service-rabbit
+          servicePort: 80

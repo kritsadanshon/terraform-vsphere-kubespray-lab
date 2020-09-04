@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service-cat
+  labels:
+    run: nginx
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    run: nginx-cat
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: nginx
+  name: nginx-deploy-cat
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: nginx-cat
+  template:
+    metadata:
+      labels:
+        run: nginx-cat
+    spec:
+      volumes:
+      - name: webdata
+        emptyDir: {}
+      initContainers:
+      - name: web-content
+        image: busybox
+        volumeMounts:
+        - name: webdata
+          mountPath: "/webdata"
+        command: ["/bin/sh", "-c", 'echo "<title>Welcome to nginx!</title><h1>CAT Application<h1/><p>&nbsp;____&nbsp; &nbsp; &nbsp;_&nbsp; &nbsp; ____<br />/ ___|&nbsp; &nbsp; / \&nbsp; &nbsp;|_ _|<br />| |&nbsp; &nbsp; &nbsp; &nbsp; / _ \&nbsp; &nbsp;| |<br />| |___ / ___ \ | |<br /> \____/_/&nbsp; &nbsp; \_\_|</p>" > /webdata/index.html']
+      containers:
+      - image: nginx
+        name: nginx
+        volumeMounts:
+        - name: webdata
+          mountPath: "/usr/share/nginx/html"
